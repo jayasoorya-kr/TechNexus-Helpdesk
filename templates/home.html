@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    /* Hero Section */
+    .hero-section {
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); /* Deep Tech Blue/Black */
+        color: white;
+        padding: 120px 0;
+        margin-top: -1px;
+        clip-path: polygon(0 0, 100% 0, 100% 90%, 0 100%);
+        position: relative;
+    }
+    
+    .feature-card {
+        border: none;
+        border-radius: 16px;
+        background: white;
+        padding: 2.5rem;
+        height: 100%;
+        transition: all 0.4s ease;
+        border-bottom: 5px solid transparent;
+    }
+    .feature-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+        border-bottom: 5px solid #0d6efd;
+    }
+    .icon-box {
+        width: 80px;
+        height: 80px;
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1.5rem;
+        font-size: 2rem;
+        background: #f1f5f9;
+        color: #0f172a;
+        transition: 0.3s;
+    }
+    .feature-card:hover .icon-box {
+        background: #0d6efd;
+        color: white;
+    }
+</style>
+
+<div class="hero-section text-center">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-9">
+                <div class="badge bg-primary bg-opacity-25 text-primary border border-primary border-opacity-25 rounded-pill px-3 py-2 mb-4 animate__animated animate__fadeInDown">
+                    <i class="fas fa-bolt me-2"></i>Next Gen IT Management
+                </div>
+                <h1 class="display-3 fw-bold mb-3 animate__animated animate__fadeInDown">Welcome to TechNexus</h1>
+                <p class="lead mb-5 opacity-75" style="max-width: 700px; margin: 0 auto;">
+                    The centralized ecosystem for your technical operations. 
+                    Streamline support, automate workflows, and resolve issues faster.
+                </p>
+                <div class="d-flex justify-content-center gap-3 animate__animated animate__fadeInUp">
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'dashboard' %}" class="btn btn-primary btn-lg px-5 rounded-pill fw-bold shadow hover-scale">
+                            <i class="fas fa-columns me-2"></i>Launch Console
+                        </a>
+                    {% else %}
+                        <a href="{% url 'login' %}" class="btn btn-light btn-lg px-5 rounded-pill fw-bold text-dark shadow hover-scale">
+                            Login
+                        </a>
+                        <a href="{% url 'signup' %}" class="btn btn-outline-light btn-lg px-5 rounded-pill fw-bold hover-scale">
+                            Get Started
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container py-5 mt-5">
+    <div class="text-center mb-5">
+        <h6 class="text-primary fw-bold text-uppercase ls-md">Platform Capabilities</h6>
+        <h2 class="fw-bold display-6">Engineered for Efficiency</h2>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="feature-card shadow-sm">
+                <div class="icon-box">
+                    <i class="fas fa-project-diagram"></i>
+                </div>
+                <h4 class="fw-bold mb-3">Seamless Workflow</h4>
+                <p class="text-muted">
+                    Orchestrate support from <b>Open</b> to <b>Resolved</b> with our intelligent ticket lifecycle engine.
+                </p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="feature-card shadow-sm">
+                <div class="icon-box">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <h4 class="fw-bold mb-3">Secure Core</h4>
+                <p class="text-muted">
+                    Role-based architecture ensures restricted access for <b>Users</b>, <b>Engineers</b>, and <b>Admins</b>.
+                </p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="feature-card shadow-sm">
+                <div class="icon-box">
+                    <i class="fas fa-brain"></i>
+                </div>
+                <h4 class="fw-bold mb-3">AI Diagnostics</h4>
+                <p class="text-muted">
+                    Our <b>TechNexus AI</b> assists with common troubleshooting and navigation instantly.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TechNexus | Enterprise Support</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { 
+            background-color: #f8f9fa; 
+            font-family: 'Inter', sans-serif; 
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .navbar { background: white; box-shadow: 0 4px 20px rgba(0,0,0,0.05); }
+        .navbar-brand { letter-spacing: -0.5px; font-size: 1.3rem; }
+        .hover-scale:hover { transform: scale(1.05); transition: 0.2s; }
+        
+        /* Assistant Styles */
+        #assistant-ui {
+            position: fixed; 
+            bottom: 90px; 
+            right: 30px; 
+            width: 360px; 
+            display: none; 
+            z-index: 9999; 
+            border-radius: 16px; 
+            overflow: hidden;
+            border: none;
+        }
+        #chat-box::-webkit-scrollbar { width: 6px; }
+        #chat-box::-webkit-scrollbar-thumb { background-color: #dee2e6; border-radius: 10px; }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg py-3 sticky-top">
+        <div class="container">
+            <a class="navbar-brand fw-bold d-flex align-items-center" href="/">
+                <div class="bg-primary text-white rounded p-1 me-2 d-flex align-items-center justify-content-center shadow-sm" style="width: 35px; height: 35px;">
+                    <i class="fas fa-layer-group"></i>
+                </div>
+                TechNexus
+            </a>
+            <div class="ms-auto">
+                {% if user.is_authenticated %}
+                    <span class="me-3 small fw-bold text-muted">Hi, {{ user.username }}</span>
+                    <form action="{% url 'logout' %}" method="post" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill px-4 fw-bold">Logout</button>
+                    </form>
+                {% else %}
+                    <a href="{% url 'login' %}" class="btn btn-sm btn-primary rounded-pill px-4 fw-bold shadow-sm">Login</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <div class="flex-grow-1">
+        {% block content %}{% endblock %}
+    </div>
+
+    <div id="assistant-ui" class="card shadow-lg">
+        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center py-3">
+            <span class="fw-bold"><i class="fas fa-robot me-2"></i>TechNexus AI</span>
+            <button onclick="toggleAssistant()" class="btn btn-sm text-white"><i class="fas fa-times"></i></button>
+        </div>
+        
+        <div id="chat-box" class="card-body bg-light" style="height: 320px; overflow-y: auto;">
+            <div class="d-flex flex-column align-items-start mb-2">
+                <div class="bg-primary text-white p-3 rounded-3 shadow-sm" style="border-bottom-left-radius: 0; max-width: 85%;">
+                    <strong>Welcome to TechNexus!</strong><br>
+                    I can help you troubleshoot. Try asking about:<br>
+                    <span class="badge bg-white text-primary mt-2 me-1">Password</span>
+                    <span class="badge bg-white text-primary mt-2 me-1">Wifi</span>
+                    <span class="badge bg-white text-primary mt-2">Printer</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-footer bg-white p-2">
+            <div class="input-group">
+                <input type="text" id="assistant-input" class="form-control border-0 bg-light rounded-start-pill ps-3" placeholder="Type your issue..." onkeypress="handleEnter(event)">
+                <button onclick="sendMessage()" class="btn btn-primary rounded-end-pill px-3">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <button onclick="toggleAssistant()" class="btn btn-dark rounded-circle shadow-lg p-0 d-flex align-items-center justify-content-center" style="position: fixed; bottom: 30px; right: 30px; z-index: 9998; width: 60px; height: 60px; transition: transform 0.3s;">
+        <i class="fas fa-layer-group fa-lg"></i>
+    </button>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        const ui = document.getElementById('assistant-ui');
+        const chatBox = document.getElementById('chat-box');
+        const inputField = document.getElementById('assistant-input');
+
+        function toggleAssistant() {
+            if (ui.style.display === 'none' || ui.style.display === '') {
+                ui.style.display = 'block';
+                inputField.focus(); 
+            } else {
+                ui.style.display = 'none';
+            }
+        }
+        
+        function addMsg(text, isUser) {
+            const div = document.createElement('div');
+            div.className = isUser ? "d-flex justify-content-end mb-2 fade-in" : "d-flex justify-content-start mb-2 fade-in";
+            
+            const bubble = document.createElement('div');
+            bubble.className = isUser ? "bg-secondary text-white p-2 px-3 rounded-3 shadow-sm" : "bg-primary text-white p-2 px-3 rounded-3 shadow-sm";
+            bubble.style.maxWidth = "85%";
+            bubble.style.borderBottomRightRadius = isUser ? "0" : "0.5rem";
+            bubble.style.borderBottomLeftRadius = isUser ? "0.5rem" : "0";
+            bubble.innerHTML = text;
+            
+            div.appendChild(bubble);
+            chatBox.appendChild(div);
+            chatBox.scrollTop = chatBox.scrollHeight; 
+        }
+
+        function sendMessage() {
+            const text = inputField.value.trim();
+            if (!text) return;
+            addMsg(text, true);
+            inputField.value = '';
+            setTimeout(() => { processCommand(text.toLowerCase()); }, 600);
+        }
+
+        function processCommand(cmd) {
+            let response = "";
+            let redirect = "";
+
+            if (cmd.includes('login')) {
+                response = "Redirecting to Login...";
+                redirect = "{% url 'login' %}";
+            } 
+            else if (cmd.includes('signup')) {
+                response = "Redirecting to Registration...";
+                redirect = "{% url 'signup' %}";
+            }
+            else if (cmd.includes('dashboard')) {
+                response = "Opening your Dashboard...";
+                redirect = "{% url 'dashboard' %}";
+            }
+            // --- KNOWLEDGE BASE ---
+            else if (cmd.includes('password')) {
+                response = "<b>Try this:</b> Check Caps Lock. If stuck, contact Admin to reset credentials.";
+            }
+            else if (cmd.includes('internet') || cmd.includes('wifi')) {
+                response = "<b>Fix:</b> Restart your router. If issue persists, log a 'Network' ticket.";
+            }
+            else if (cmd.includes('printer')) {
+                response = "<b>Fix:</b> Check paper tray and cables. Restart the printer.";
+            }
+            else if (cmd.includes('slow')) {
+                response = "<b>Fix:</b> Close unused apps and restart your machine.";
+            }
+            else if (cmd.includes('hello')) {
+                response = "Hello! I am TechNexus AI. How can I assist?";
+            }
+            else {
+                response = "I didn't catch that. Try asking about <b>Password</b>, <b>Wifi</b>, or say <b>Login</b>.";
+            }
+
+            addMsg(response, false);
+            if (redirect) { setTimeout(() => window.location.href = redirect, 1500); }
+        }
+
+        function handleEnter(event) {
+            if (event.key === "Enter") sendMessage();
+        }
+    </script>
+</body>
+</html>

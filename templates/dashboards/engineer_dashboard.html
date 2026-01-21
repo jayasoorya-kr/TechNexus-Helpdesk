@@ -1,0 +1,182 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    /* Dashboard specific styles matching the suite */
+    .dashboard-header {
+        background: white;
+        padding: 2rem;
+        border-radius: 15px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+        margin-bottom: 2rem;
+        border-left: 5px solid #0dcaf0; /* Cyan accent for Engineers */
+    }
+
+    .card-modern {
+        border: none;
+        border-radius: 15px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        background: white;
+        transition: transform 0.3s ease;
+        overflow: hidden;
+    }
+
+    /* Table Styling */
+    .table-modern {
+        width: 100%;
+        margin-bottom: 0;
+    }
+    .table-modern thead th {
+        background-color: #f8f9fa;
+        color: #495057;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.85rem;
+        padding: 15px;
+        border-bottom: 2px solid #e9ecef;
+    }
+    .table-modern tbody td {
+        padding: 15px;
+        vertical-align: middle;
+        color: #555;
+        border-bottom: 1px solid #f1f1f1;
+    }
+    .table-modern tbody tr:hover {
+        background-color: #fcfcfc;
+    }
+
+    /* Status Badges */
+    .status-badge {
+        padding: 6px 12px;
+        border-radius: 30px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        display: inline-block;
+        min-width: 90px;
+        text-align: center;
+    }
+    .status-open { background-color: #ffe5e5; color: #d63384; }
+    .status-progress { background-color: #fff3cd; color: #856404; }
+    .status-resolved { background-color: #d1e7dd; color: #0f5132; }
+
+    /* Action Form Controls */
+    .status-select {
+        border-radius: 20px;
+        border: 1px solid #e0e0e0;
+        padding: 5px 30px 5px 15px; /* Extra padding for dropdown arrow */
+        font-size: 0.9rem;
+        background-color: #f8f9fa;
+        cursor: pointer;
+    }
+    .status-select:focus {
+        border-color: #0dcaf0;
+        box-shadow: 0 0 0 3px rgba(13, 202, 240, 0.1);
+    }
+    .btn-update {
+        border-radius: 20px;
+        padding: 5px 15px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        transition: all 0.2s;
+    }
+    
+    /* Animation */
+    .animate-up { animation: fadeInUp 0.5s ease-out forwards; opacity: 0; }
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
+
+<div class="container-fluid px-4 py-4">
+
+    <div class="dashboard-header d-flex justify-content-between align-items-center animate-up">
+        <div>
+            <h2 class="fw-bold text-dark mb-1">Engineer Workspace</h2>
+            <p class="text-muted mb-0">Manage your assigned tickets and update resolutions.</p>
+        </div>
+        <div class="text-center px-4 py-2 bg-light rounded-4 border border-light">
+            <span class="d-block text-muted small fw-bold text-uppercase">Active Tasks</span>
+            <span class="h3 fw-bold text-info mb-0">{{ tickets|length }}</span>
+        </div>
+    </div>
+
+    <div class="card card-modern animate-up" style="animation-delay: 0.1s;">
+        <div class="card-body p-4">
+            
+            <div class="d-flex align-items-center mb-4">
+                <div class="bg-info bg-opacity-10 text-info rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                    <i class="fas fa-tools"></i>
+                </div>
+                <h5 class="fw-bold mb-0 text-dark">My Assignments</h5>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-modern">
+                    <thead>
+                        <tr>
+                            <th style="width: 10%;">ID</th>
+                            <th style="width: 25%;">Issue</th>
+                            <th style="width: 15%;">Category</th>
+                            <th style="width: 15%;">Current Status</th>
+                            <th style="width: 35%; text-align: right;">Update Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for ticket in tickets %}
+                        <tr>
+                            <td class="fw-bold text-muted">#{{ ticket.id }}</td>
+                            <td>
+                                <span class="d-block fw-bold text-dark mb-1">{{ ticket.title }}</span>
+                                <small class="text-muted d-block text-truncate" style="max-width: 250px;">
+                                    {{ ticket.description }}
+                                </small>
+                            </td>
+                            <td>
+                                <span class="badge bg-light text-secondary border">
+                                    <i class="fas fa-tag me-1"></i> {{ ticket.category }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if ticket.status == 'Open' %}
+                                    <span class="status-badge status-open">Open</span>
+                                {% elif ticket.status == 'In Progress' %}
+                                    <span class="status-badge status-progress">In Progress</span>
+                                {% else %}
+                                    <span class="status-badge status-resolved">Resolved</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-end">
+                                <form method="post" action="{% url 'update_status' ticket.id %}" class="d-flex justify-content-end align-items-center gap-2">
+                                    {% csrf_token %}
+                                    <select name="status" class="form-select form-select-sm status-select w-auto">
+                                        <option value="In Progress" {% if ticket.status == 'In Progress' %}selected{% endif %}>In Progress</option>
+                                        <option value="Resolved">Resolved</option>
+                                    </select>
+                                    <button type="submit" class="btn btn-info text-white btn-update shadow-sm">
+                                        <i class="fas fa-save me-1"></i> Update
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr style="display: none;"></tr> 
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+                {% if not tickets %}
+                <div class="text-center py-5">
+                    <div class="mb-3 text-muted opacity-25">
+                        <i class="fas fa-coffee fa-4x"></i>
+                    </div>
+                    <h5 class="text-muted fw-bold">All caught up!</h5>
+                    <p class="text-muted small">No pending tickets assigned to you at the moment.</p>
+                </div>
+                {% endif %}
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

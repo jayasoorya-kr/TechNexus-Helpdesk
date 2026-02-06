@@ -86,8 +86,10 @@ def create_ticket(request):
             ticket = form.save(commit=False)
             ticket.created_by = request.user
             ticket.save()
-            messages.success(request, "Ticket created.")
+            messages.success(request, "Ticket created Successfully.")
             return redirect('dashboard')
+        else:
+            messages.error(request, "Please correct the errors in the form.")
     else:
         form = TicketForm()
     return render(request, 'tickets/create_ticket.html', {'form': form})

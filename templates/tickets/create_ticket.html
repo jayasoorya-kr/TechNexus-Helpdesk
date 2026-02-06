@@ -43,7 +43,7 @@
     }
 
     .btn-submit {
-        background: linear-gradient(to right, #11998e, #38ef7d); /* Fresh Green Gradient */
+        background: linear-gradient(to right, #11998e, #38ef7d);
         border: none;
         padding: 12px 30px;
         border-radius: 50px;
@@ -69,11 +69,8 @@
         margin-top: 15px;
     }
 
-    .btn-cancel:hover {
-        color: #343a40;
-    }
+    .btn-cancel:hover { color: #343a40; }
     
-    /* Animation */
     .animate-in { animation: fadeInUp 0.6s ease-out; }
     @keyframes fadeInUp {
         from { opacity: 0; transform: translateY(20px); }
@@ -98,20 +95,36 @@
                     <form method="post">
                         {% csrf_token %}
                         
+                        {% if form.errors %}
+                            <div class="alert alert-danger">
+                                <strong>Please correct the errors below:</strong>
+                                {{ form.errors }}
+                            </div>
+                        {% endif %}
+
                         <div class="mb-4">
                             <label class="form-label">Subject / Title</label>
                             <div class="input-group">
                                 <span class="input-group-text bg-light border-end-0 text-muted rounded-start-3 ps-3"><i class="fas fa-heading"></i></span>
                                 {{ form.title }} 
                             </div>
-                            <div class="form-text text-muted small ps-1">Keep it short and descriptive (e.g., "Wifi not connecting").</div>
                         </div>
 
-                        <div class="mb-4">
-                            <label class="form-label">Category</label>
-                            <div class="input-group">
-                                <span class="input-group-text bg-light border-end-0 text-muted rounded-start-3 ps-3"><i class="fas fa-list"></i></span>
-                                {{ form.category }}
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <label class="form-label">Category</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0 text-muted rounded-start-3 ps-3"><i class="fas fa-list"></i></span>
+                                    {{ form.category }}
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 mb-4">
+                                <label class="form-label">Priority</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0 text-muted rounded-start-3 ps-3"><i class="fas fa-tachometer-alt"></i></span>
+                                    {{ form.priority }}
+                                </div>
                             </div>
                         </div>
 
@@ -142,16 +155,12 @@
 
 <script>
     document.addEventListener("DOMContentLoaded", function() {
-        // Target all input, select, and textarea elements inside the form
         const formFields = document.querySelectorAll('input[type="text"], select, textarea');
-        
         formFields.forEach(field => {
             field.classList.add('form-control');
-            // Remove default border radius on left side because of input-group
             if(field.tagName !== 'TEXTAREA') {
                 field.classList.add('border-start-0', 'ps-0');
             } else {
-                // Textarea doesn't use input-group icon in this layout
                 field.classList.remove('border-start-0', 'ps-0'); 
             }
         });
